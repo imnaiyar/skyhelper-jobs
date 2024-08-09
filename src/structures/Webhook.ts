@@ -9,7 +9,7 @@ class Webhook {
     this.token = data.token;
   }
   async send(options: WebhookMessageCreateOptions): Promise<APIMessage> {
-    if (this.token) this.token = (await this.getWebhook(this.id)).token;
+    if (!this.token) this.token = (await this.getWebhook(this.id)).token;
     const query = makeURLSearchParams({ wait: true });
     return (await api.post(Routes.webhook(this.id, this.token), { body: { ...options }, query })) as APIMessage;
   }
