@@ -15,7 +15,7 @@ Running cron jobs is not resources exhaustive itself, but sending reminders/live
 
 ```bash
 git clone https://github.com/imnaiyar/skyhelper-jobs
-pnpm install # or npm or yarn
+bun install # or npm or yarn  or pnpm
 ```
 
 - Make sure to rename `.env.example` and fill the required values.
@@ -23,7 +23,7 @@ pnpm install # or npm or yarn
 > [!IMPORTANT]  
 > Make sure that bot token and Mongo connection url is the same as the one you used to run the main bot
 
-- Start the project by running `pnpm start`
+- Start the project by running `bun run start:bun` (use `start` script if you are not using bun)
 
 > [!WARNING]  
 > TODO: Lot's of the codes are cloned/duplicated from the main bot, find a way to effectively reuse it and reduce duplications
