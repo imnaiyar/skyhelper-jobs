@@ -10,6 +10,7 @@ cron.schedule(
   async () => {
     try {
       await eventSchedules("times");
+      logger.info("Ran SkyTimes Job");
     } catch (err) {
       logger.error("SkyTimes Job Error: ", err);
     }
@@ -23,6 +24,7 @@ cron.schedule(
   async () => {
     try {
       await eventSchedules("shard");
+      logger.info("Ran Shards Job");
     } catch (err) {
       logger.error("Shards Job Error: ", err);
     }
