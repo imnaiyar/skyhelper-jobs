@@ -27,3 +27,5 @@ bun install # or npm or yarn  or pnpm
 
 > [!WARNING]  
 > TODO: Lot's of the codes are cloned/duplicated from the main bot, find a way to effectively reuse it and reduce duplications
+
+License: MIT
