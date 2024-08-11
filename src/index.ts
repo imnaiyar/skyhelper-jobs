@@ -55,17 +55,23 @@ const RemindersToSchedule = [
   },
 ] as const;
 
-for (const job of RemindersToSchedule) {
+for (const { name, interval } of RemindersToSchedule) {
+  const nameFormat = name.charAt(0).toUpperCase() + name.slice(1);
   cron.schedule(
-    job.interval,
+    interval,
     async () => {
       try {
-        await reminderSchedules(job.name);
+        await reminderSchedules(name);
+        logger.info(`Ran ${nameFormat} Reminder Job`);
       } catch (err) {
-        logger.error(`${job.name.charAt(0).toUpperCase() + job.name.slice(1)} R Error: `, err);
+        logger.error(`${nameFormat} R Error: `, err);
       }
     },
-    { ...options, name: job.name.charAt(0).toUpperCase() + job.name.slice(1) },
+    { ...options, name: nameFormat + " Reminder" },
   );
 }
 logger.info("Logged in and Jobs have been started");
+
+// Catch any unknown errors
+process.on("uncaughtException", logger.error);
+process.on("unhandledRejection", logger.error);
