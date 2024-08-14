@@ -15,7 +15,7 @@ cron.schedule(
       logger.error("SkyTimes Job Error: ", err);
     }
   },
-  { name: "SkyTImes Job" },
+  { name: "SkyTimes Job" },
 );
 
 // Shards job
@@ -32,30 +32,9 @@ cron.schedule(
   { name: "Shards Job" },
 );
 const options = { timezone: "America/Los_Angeles" };
-const RemindersToSchedule = [
-  {
-    name: "turtle",
-    interval: "50 */2 * * *",
-  },
-  {
-    name: "grandma",
-    interval: "30 */2 * * *",
-  },
-  {
-    name: "geyser",
-    interval: "0 */2 * * *",
-  },
-  {
-    name: "reset",
-    interval: "0 0 * * *",
-  },
-  {
-    name: "eden",
-    interval: "0 0 * * 0",
-  },
-] as const;
+const RemindersToSchedule = [ [ "turtle", "50 */2 * * *", ], [ "grandma", "30 */2 * * *", ], [ "geyser", "0 */2 * * *", ], [ "reset", "0 0 * * *", ], [ "eden", "0 0 * * 0", ], ] as const;
 
-for (const { name, interval } of RemindersToSchedule) {
+for (const [ name, interval ] of RemindersToSchedule) {
   const nameFormat = name.charAt(0).toUpperCase() + name.slice(1);
   cron.schedule(
     interval,
