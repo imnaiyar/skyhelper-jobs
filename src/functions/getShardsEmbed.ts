@@ -80,7 +80,7 @@ export default (
   if (status === "No Shard") {
     result = {
       ...result,
-      url: "https://media.discordapp.net/attachments/867638574571323424/1193308709183553617/20240107_0342171.gif",
+      image: { url: "https://media.discordapp.net/attachments/867638574571323424/1193308709183553617/20240107_0342171.gif" },
       description: `**${t("shards-embed.NO-SHARD")}**`,
       color: resolveColor("#9fb686"),
     };
