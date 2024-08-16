@@ -9,7 +9,6 @@ type events = "geyser" | "grandma" | "turtle" | "eden" | "reset";
 
 /**
  * Sends the reminder to the each active guilds
- * @param client The bot client
  * @param type Type of the event
  */
 export async function reminderSchedules(type: events): Promise<void> {
@@ -25,23 +24,31 @@ export async function reminderSchedules(type: events): Promise<void> {
       if (!webhook.id || !webhook.token) return;
       const wb = new Webhook({ token: webhook.token, id: webhook.id });
 
-      const roleid = event?.role ?? default_role ?? "";
+      const roleid = event?.role ?? default_role ?? undefined;
       const role = roleid && t("reminders.ROLE_MENTION", { ROLE: roleMention(roleid) });
 
       let response = null;
       if (type === "eden") {
-        response = { content: `${role} ${t("reminders.EDEN_RESET")}` };
+        response = t("reminders.EDEN_RESET");
       } else if (type === "reset") {
-        response = { content: `${role}${t("reminders.DAILY_RESET")}` };
+        response = t("reminders.DAILY_RESET");
       } else {
-        response = { content: getResponse(type, t, role) };
+        response = getResponse(type, t);
       }
       if (!response) return;
       wb.send({
-        // @ts-expect-error
-        username: t("reminders.TITLE", { TYPE: t("times-embed." + (type === "reset" ? "DAILY" : type.toUpperCase())) }),
+        username: "SkyHelper",
         avatar_url: "https://skyhelper.xyz/assets/img/boticon.png",
-        ...response,
+        content: role,
+        embeds: [
+          {
+            author: { name: "SkyHelper Reminders", icon_url: "https://skyhelper.xyz/assets/img/boticon.png" },
+            // @ts-expect-error
+            title: t("reminders.TITLE", { TYPE: t("times-embed." + (type === "reset" ? "DAILY" : type.toUpperCase())) }),
+            description: response,
+            timestamp: new Date().toISOString(),
+          },
+        ],
       })
         .then((msg) => {
           guild.reminders[type].last_messageId = msg?.id || undefined;
@@ -72,7 +79,7 @@ export async function reminderSchedules(type: events): Promise<void> {
  * @param role Role mention, if any
  * @returns The response to send
  */
-function getResponse(type: events, t: (key: langKeys, options?: {}) => string, role: string) {
+function getResponse(type: events, t: (key: langKeys, options?: {}) => string) {
   let skytime;
   let offset = 0;
   switch (type) {
@@ -91,7 +98,7 @@ function getResponse(type: events, t: (key: langKeys, options?: {}) => string, r
   }
   const { startTime, endTime, active } = getDailyEventTimes(offset);
   if (!active) return t("reminders.ERROR");
-  return `${role}\n${t("reminders.COMMON", {
+  return `${t("reminders.COMMON", {
     // @ts-expect-error
     TYPE: t("times-embed." + skytime?.toUpperCase()),
     TIME: `<t:${startTime.unix()}:t>`,
@@ -99,3 +106,4 @@ function getResponse(type: events, t: (key: langKeys, options?: {}) => string, r
     "TIME-END-R": `<t:${endTime.unix()}:R>`,
   })}`;
 }
+
