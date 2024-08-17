@@ -1,6 +1,6 @@
 {
   "name": "skyhelper-jobs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Run cron jobs (scheduled reminders) for SkyHelper bot",
   "type": "module",
   "main": "dist/index.js",
