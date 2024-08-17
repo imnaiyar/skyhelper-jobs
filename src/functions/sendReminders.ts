@@ -4,6 +4,7 @@ import { roleMention } from "@discordjs/builders";
 import { getTranslator, langKeys } from "./getTranslator.js";
 import { logger } from "#src/structures/Logger.js";
 import { getDailyEventTimes } from "./getTimesEmbed.js";
+import { resolveColor } from "../utils/resolveColor.js"
 
 type events = "geyser" | "grandma" | "turtle" | "eden" | "reset";
 
@@ -46,6 +47,7 @@ export async function reminderSchedules(type: events): Promise<void> {
             // @ts-expect-error
             title: t("reminders.TITLE", { TYPE: t("times-embed." + (type === "reset" ? "DAILY" : type.toUpperCase())) }),
             description: response,
+            color: resolveColor("Random"),
             timestamp: new Date().toISOString(),
           },
         ],
