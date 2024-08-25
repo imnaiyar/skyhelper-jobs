@@ -3,8 +3,8 @@ import { Webhook } from "#src/structures/Webhook.js";
 import { roleMention } from "@discordjs/builders";
 import { getTranslator, langKeys } from "./getTranslator.js";
 import { logger } from "#src/structures/Logger.js";
-import { getDailyEventTimes } from "./getTimesEmbed.js";
-import { resolveColor } from "../utils/resolveColor.js"
+import { SkytimesUtils as skyutils } from "skyhelper-utils";
+import { resolveColor } from "../utils/resolveColor.js";
 
 type events = "geyser" | "grandma" | "turtle" | "eden" | "reset";
 
@@ -45,7 +45,7 @@ export async function reminderSchedules(type: events): Promise<void> {
           {
             author: { name: "SkyHelper Reminders", icon_url: "https://skyhelper.xyz/assets/img/boticon.png" },
             // @ts-expect-error
-            title: t("reminders.TITLE", { TYPE: t("times-embed." + (type === "reset" ? "DAILY" : type.toUpperCase())) }),
+            title: t("reminders.TITLE", { TYPE: t("times-embed." + (type === "reset" ? "DAILY-RESET" : type.toUpperCase())) }),
             description: response,
             color: resolveColor("Random"),
             timestamp: new Date().toISOString(),
@@ -83,22 +83,22 @@ export async function reminderSchedules(type: events): Promise<void> {
  */
 function getResponse(type: events, t: (key: langKeys, options?: {}) => string) {
   let skytime;
-  let offset = 0;
+  let key = "";
   switch (type) {
     case "grandma":
       skytime = "Grandma";
-      offset = 30;
+      key = "grandma";
       break;
     case "geyser":
       skytime = "Geyser";
-      offset = 0;
+      key = "geyser";
       break;
     case "turtle":
       skytime = "Turtle";
-      offset = 50;
+      key = "turtle";
       break;
   }
-  const { startTime, endTime, active } = getDailyEventTimes(offset);
+  const { startTime, endTime, active } = skyutils.getEventDetails(key).status;
   if (!active) return t("reminders.ERROR");
   return `${t("reminders.COMMON", {
     // @ts-expect-error

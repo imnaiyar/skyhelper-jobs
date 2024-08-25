@@ -1,6 +1,6 @@
 {
   "name": "skyhelper-jobs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Run cron jobs (scheduled reminders) for SkyHelper bot",
   "type": "module",
   "main": "dist/index.js",
@@ -54,6 +54,7 @@
     "moment-timezone": "^0.5.45",
     "mongoose": "^8.5.1",
     "node-cron": "^3.0.3",
-    "skyhelper-utils": "^1.2.10"
+    "skyhelper-utils": "^1.2.19"
   }
 }
+
