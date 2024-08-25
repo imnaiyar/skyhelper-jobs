@@ -51,34 +51,6 @@ export interface Reminders {
     channelId: string | null;
   };
 }
-export interface BaseTimes {
-  /* Whether the event is active or not */
-  active: boolean;
-
-  /* The time when the event starts */
-  nextTime: moment.Moment;
-
-  /* The countdown to the event */
-  duration: string;
-}
-
-interface ActiveTimes extends BaseTimes {
-  active: true;
-  /* The time when the event started if active */
-  startTime: moment.Moment;
-
-  /* The time when the event ends if active */
-  endTime: moment.Moment;
-}
-interface NotActiveTimes extends BaseTimes {
-  active: false;
-  /* The time when the event started if active */
-  startTime?: moment.Moment;
-
-  /* The time when the event ends if active */
-  endTime?: moment.Moment;
-}
-export type Times = ActiveTimes | NotActiveTimes;
 
 interface Level {
   title: string;
@@ -141,3 +113,4 @@ export interface RegularSpiritData extends BaseSpiritData {
   };
 }
 export type SpiritsData = SeasonalSpiritData | RegularSpiritData;
+
