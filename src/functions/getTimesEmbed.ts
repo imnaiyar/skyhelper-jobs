@@ -2,9 +2,9 @@ import moment from "moment-timezone";
 import "moment-duration-format";
 import type { getTranslator } from "./getTranslator.js";
 import { getSpecialEventDB } from "#src/database/getSpecialEventDB.js";
-import { SpiritsData } from "#src/types.js";
+import type { SpiritsData } from "../constants/spirits-datas/type.d.ts";
 import { APIEmbed } from "discord-api-types/v10";
-import spiritsData from "#src/constants/spiritsData.js";
+import spiritsData from "#src/constants/spirits-datas/index.js";
 import getTS from "#src/utils/getTS.js";
 import { SkytimesUtils as skyutils } from "skyhelper-utils";
 import { resolveColor } from "#src/utils/resolveColor.js";
@@ -36,7 +36,7 @@ export const getTimesEmbed = async (t: ReturnType<typeof getTranslator>, text?: 
     tsDesc = "Unknown!";
   } else {
     const spirit: SpiritsData = spiritsData[tsData.value as keyof typeof spiritsData];
-    const emote = spirit?.emote?.icon || spirit?.call?.icon || spirit?.stance?.icon || spirit?.action?.icon || "❓";
+    const emote = spirit?.expression?.icon || "❓";
     const strVisiting = t("times-embed.TS_VISITING", {
       TS_NAME: `${emote} ${spirit?.name || t("times-embed.TS_UPDATED")}`,
       DATE: `<t:${tsData.nextVisit.clone().add(3, "days").endOf("day").unix()}:F>`,
