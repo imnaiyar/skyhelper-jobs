@@ -54,7 +54,6 @@
     "moment-timezone": "^0.5.45",
     "mongoose": "^8.5.1",
     "node-cron": "^3.0.3",
-    "skyhelper-utils": "^1.2.19"
+    "skyhelper-utils": "^1.2.20"
   }
 }
-
