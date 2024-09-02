@@ -34,8 +34,8 @@ cron.schedule(
 const options = { timezone: "America/Los_Angeles" };
 const RemindersToSchedule = [
   ["turtle", "50 */2 * * *"],
-  ["grandma", "35 */2 * * *"],
-  ["geyser", "5 */2 * * *"],
+  ["grandma", "30 */2 * * *"],
+  ["geyser", "0 */2 * * *"],
   ["reset", "0 0 * * *"],
   ["eden", "0 0 * * 0"],
 ] as const;
