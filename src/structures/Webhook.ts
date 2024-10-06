@@ -2,6 +2,19 @@ import { APIAllowedMentions, APIEmbed, APIMessage, APIMessageComponent, APIWebho
 import { makeURLSearchParams, REST } from "@discordjs/rest";
 import { logger } from "./Logger.js";
 const api = new REST().setToken(process.env.TOKEN);
+
+/** Error codes for which the operation will be retried in case of incident */
+const retraibleErrors = [
+  "ECONNRESET", // Forcefully closed connection
+  "ETIMEDOUT", // Connection timed out
+  "ENOTFOUND", // DNS lookup failed
+  "EAI_AGAIN", // DNS lookup timed out
+  "ECONNABORTED", // Connection aborted
+  "ESOCKETTIMEDOUT", // Socket timed out
+  "ConnectionRefused", // Connection refused
+  "ConnectTimeout", // Connection timed out
+  "ECONNREFUSED", // Connection refused
+];
 class Webhook {
   private id: string;
   private token: string | undefined;
@@ -22,7 +35,7 @@ class Webhook {
       const query = makeURLSearchParams({ wait: true });
       return api.post(Routes.webhook(this.id, this.token), { body: { ...options }, query }) as Promise<APIMessage>;
     } catch (err: any) {
-      if (retries > 0 && (err.code === "ECONNRESET" || err.code === "ETIMEDOUT")) {
+      if (retries > 0 && retraibleErrors.includes(err.code)) {
         logger.warn(`Retrying webhook send... Attempts left: ${retries}`);
         await new Promise((r) => setTimeout(r, 2000));
         return this.send(options, retries - 1);
@@ -43,7 +56,7 @@ class Webhook {
       if (!messageId) throw new Error("Yout must provide message id to edit");
       return api.patch(Routes.webhookMessage(this.id, this.token, messageId), { body: { ...options } });
     } catch (err: any) {
-      if (retries > 0 && (err.code === "ECONNRESET" || err.code === "ETIMEDOUT")) {
+      if (retries > 0 && retraibleErrors.includes(err.code)) {
         logger.warn(`Retrying webhook send... Attempts left: ${retries}`);
         await new Promise((r) => setTimeout(r, 2000));
         return this.send(options, retries - 1);
