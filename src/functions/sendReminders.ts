@@ -5,74 +5,81 @@ import { getTranslator, langKeys } from "./getTranslator.js";
 import { logger } from "#src/structures/Logger.js";
 import { SkytimesUtils as skyutils } from "skyhelper-utils";
 import { resolveColor } from "../utils/resolveColor.js";
+import { GuildSchema } from "#src/types.js";
+import { throttleRequests } from "./throttleRequests.js";
 
-type events = "geyser" | "grandma" | "turtle" | "eden" | "reset";
+type Events = "geyser" | "grandma" | "turtle" | "eden" | "reset";
 
 /**
  * Sends the reminder to the each active guilds
  * @param type Type of the event
  */
-export async function reminderSchedules(type: events): Promise<void> {
+export async function reminderSchedules(type: Events): Promise<void> {
   const activeGuilds = await getActiveReminders();
-  activeGuilds.forEach(async (guild) => {
-    const t = getTranslator(guild.language?.value ?? "en-US");
-    try {
-      const rmd = guild?.reminders;
-      if (!rmd) return;
-      const event = rmd[type];
-      const { webhook, default_role } = rmd;
-      if (!event?.active) return;
-      if (!webhook.id || !webhook.token) return;
-      const wb = new Webhook({ token: webhook.token, id: webhook.id });
+  await throttleRequests(activeGuilds, (data) => sendGuildReminder(data, type));
+}
 
-      const roleid = event?.role ?? default_role ?? undefined;
-      const role = roleid && t("reminders.ROLE_MENTION", { ROLE: roleMention(roleid) });
+async function sendGuildReminder(guild: GuildSchema, type: Events) {
+  const t = getTranslator(guild.language?.value ?? "en-US");
+  try {
+    const rmd = guild?.reminders;
+    if (!rmd) return;
+    const event = rmd[type];
+    const { webhook, default_role } = rmd;
+    if (!event?.active) return;
+    if (!webhook.id || !webhook.token) return;
+    const wb = new Webhook({ token: webhook.token, id: webhook.id });
 
-      let response = null;
-      if (type === "eden") {
-        response = t("reminders.EDEN_RESET");
-      } else if (type === "reset") {
-        response = t("reminders.DAILY_RESET");
-      } else {
-        response = getResponse(type, t);
-      }
-      if (!response) return;
-      wb.send({
+    const roleid = event?.role ?? default_role ?? undefined;
+    const role = roleid && t("reminders.ROLE_MENTION", { ROLE: roleMention(roleid) });
+
+    let response = null;
+    if (type === "eden") {
+      response = t("reminders.EDEN_RESET");
+    } else if (type === "reset") {
+      response = t("reminders.DAILY_RESET");
+    } else {
+      response = getResponse(type, t);
+    }
+    if (!response) return;
+    const msg = await wb
+      .send({
         username: "SkyHelper",
         avatar_url: "https://skyhelper.xyz/assets/img/boticon.png",
         content: role,
         embeds: [
           {
             author: { name: "SkyHelper Reminders", icon_url: "https://skyhelper.xyz/assets/img/boticon.png" },
-            // @ts-expect-error
-            title: t("reminders.TITLE", { TYPE: t("times-embed." + (type === "reset" ? "DAILY-RESET" : type.toUpperCase())) }),
+            title: t("reminders.TITLE", {
+              // @ts-expect-error
+              TYPE: t("times-embed." + (type === "reset" ? "DAILY-RESET" : type.toUpperCase())),
+            }),
             description: response,
             color: resolveColor("Random"),
             timestamp: new Date().toISOString(),
           },
         ],
       })
-        .then((msg) => {
-          guild.reminders[type].last_messageId = msg?.id || undefined;
-          guild.save().catch((err) => logger.error(guild.data.name + " Error saving Last Message Id: ", err));
-        })
-        .catch((err) => {
-          if (err.message === "Unknown Webhook") {
-            guild.reminders.webhook.id = null;
-            guild.reminders.active = false;
-            guild.reminders.webhook.token = null;
-            guild
-              .save()
-              .then(() => logger.error(`Reminders disabled for ${guild.data.name}, webhook not found!`))
-              .catch((er) => logger.error("Error Saving to Database" + ` ${type}[Guild: ${guild.data.name}]`, er));
-          }
+      .catch((err) => {
+        if (err.message === "Unknown Webhook") {
+          return "Unknown Webhook";
+        } else {
           logger.error(guild.data.name + " Reminder Error: ", err);
-        });
-      if (event.last_messageId) wb.deleteMessage(event.last_messageId).catch(() => {});
-    } catch (err) {
-      logger.error(err);
+        }
+      });
+    if (event.last_messageId) await wb.deleteMessage(event.last_messageId).catch(() => {});
+    if (msg === "Unknown Webhook") {
+      guild.reminders.webhook.id = null;
+      guild.reminders.active = false;
+      guild.reminders.webhook.token = null;
+      logger.error(`Reminders disabled for ${guild.data.name}, webhook not found!`);
+    } else if (msg) {
+      guild.reminders[type].last_messageId = msg.id;
     }
-  });
+    await guild.save().catch((err) => logger.error(guild.data.name + " Error saving Last Message Id: ", err));
+  } catch (err) {
+    logger.error(err);
+  }
 }
 
 /**
@@ -81,7 +88,7 @@ export async function reminderSchedules(type: events): Promise<void> {
  * @param role Role mention, if any
  * @returns The response to send
  */
-function getResponse(type: events, t: (key: langKeys, options?: {}) => string) {
+function getResponse(type: Events, t: (key: langKeys, options?: {}) => string) {
   let skytime;
   let key = "";
   switch (type) {
@@ -108,4 +115,3 @@ function getResponse(type: events, t: (key: langKeys, options?: {}) => string) {
     "TIME-END-R": `<t:${endTime.unix()}:R>`,
   })}`;
 }
-
