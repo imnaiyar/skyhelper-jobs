@@ -1,3 +1,5 @@
+import { logger } from "#src/structures/Logger.js";
+
 /**
  * Batch requests in the given size
  * @param batchData The data in array to batch
@@ -10,7 +12,7 @@ export async function processInBatch<T>(batchData: T[], callback: (data: T[]) =>
     try {
       await callback(dataToBatch);
     } catch (error) {
-      console.error("Error processing batch:", error);
+      logger.error("Error processing batch:", error);
     }
   }
 }
