@@ -67,10 +67,11 @@ const update = async (
       if (res.code === 10015) {
         logger.error(`Live ${type} disabled for ${guild.data.name}, webhook not found!`);
       }
-      guild[type].webhook.id = null;
-      guild[type].active = false;
-      guild[type].messageId = "";
-      guild[type].webhook.token = null;
+      guild[type] = {
+        active: false,
+        webhook: { id: null, token: null },
+        messageId: "",
+      };
       await guild.save().catch((er) => logger.error("Error Saving to Database" + ` ${type}[Guild: ${guild.data.name}]`, er));
     }
   });
