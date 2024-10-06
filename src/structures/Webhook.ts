@@ -1,5 +1,6 @@
 import { APIAllowedMentions, APIEmbed, APIMessage, APIMessageComponent, APIWebhook, Routes } from "discord-api-types/v10";
 import { makeURLSearchParams, REST } from "@discordjs/rest";
+import { logger } from "./Logger.js";
 const api = new REST().setToken(process.env.TOKEN);
 class Webhook {
   private id: string;
@@ -8,22 +9,47 @@ class Webhook {
     this.id = data.id;
     this.token = data.token;
   }
-  async send(options: WebhookMessageCreateOptions): Promise<APIMessage> {
-    if (!this.token) this.token = (await this.getWebhook(this.id)).token;
-    const query = makeURLSearchParams({ wait: true });
-    return (await api.post(Routes.webhook(this.id, this.token), { body: { ...options }, query })) as APIMessage;
+
+  /**
+   * Executes the webhook with retries in case of connection errors
+   * @param options Payload options for the webhook
+   * @param retries Number of tries in case of connection errors
+   * @returns The message created by the webhook
+   */
+  async send(options: WebhookMessageCreateOptions, retries = 3): Promise<APIMessage> {
+    try {
+      if (!this.token) this.token = (await this.getWebhook(this.id)).token;
+      const query = makeURLSearchParams({ wait: true });
+      return api.post(Routes.webhook(this.id, this.token), { body: { ...options }, query }) as Promise<APIMessage>;
+    } catch (err: any) {
+      if (retries > 0 && (err.code === "ECONNRESET" || err.code === "ETIMEDOUT")) {
+        logger.warn(`Retrying webhook send... Attempts left: ${retries}`);
+        await new Promise((r) => setTimeout(r, 2000));
+        return this.send(options, retries - 1);
+      }
+      throw err;
+    }
   }
 
   /**
-   * Edits a message sent by this webhook
+   * Edits a message sent by this webhook, also retries in case of connection errors
    * @param messageId The id of the message to edit
    * @param options Edit options
    * @returns The edited message
    */
-  async editMessage(messageId: string, options: WebhookEditMessageOptions) {
-    if (!this.token) this.token = (await this.getWebhook(this.id)).token!;
-    if (!messageId) throw new Error("Yout must provide message id to edit");
-    return await api.patch(Routes.webhookMessage(this.id, this.token, messageId), { body: { ...options } });
+  async editMessage(messageId: string, options: WebhookEditMessageOptions, retries = 3) {
+    try {
+      if (!this.token) this.token = (await this.getWebhook(this.id)).token!;
+      if (!messageId) throw new Error("Yout must provide message id to edit");
+      return api.patch(Routes.webhookMessage(this.id, this.token, messageId), { body: { ...options } });
+    } catch (err: any) {
+      if (retries > 0 && (err.code === "ECONNRESET" || err.code === "ETIMEDOUT")) {
+        logger.warn(`Retrying webhook send... Attempts left: ${retries}`);
+        await new Promise((r) => setTimeout(r, 2000));
+        return this.send(options, retries - 1);
+      }
+      throw err;
+    }
   }
 
   /**

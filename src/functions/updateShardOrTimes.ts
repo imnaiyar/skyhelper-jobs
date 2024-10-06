@@ -6,6 +6,8 @@ import getShardsEmbed from "./getShardsEmbed.js";
 import { getTimesEmbed } from "./getTimesEmbed.js";
 import { GuildSchema } from "#src/types.js";
 import { logger } from "#src/structures/Logger.js";
+import { processInBatch } from "./processInBatch.js";
+import { DiscordAPIError } from "@discordjs/rest";
 
 /**
  * Updates Shards/Times Embeds
@@ -45,32 +47,39 @@ const update = async (
   type: "autoShard" | "autoTimes",
   response: (t: ReturnType<typeof getTranslator>) => Promise<WebhookMessageCreateOptions>,
 ): Promise<void> => {
-  data.forEach(async (guild) => {
-    const event = guild[type];
-    if (!event.webhook.id) return;
-    const webhook = new Webhook({ token: event.webhook.token || undefined, id: event.webhook.id });
-    const t = getTranslator(guild.language?.value ?? "en-US");
-    const now = moment();
-    webhook
-      .editMessage(event.messageId, {
-        content: t("shards-embed.CONTENT", { TIME: `<t:${now.unix()}:R>` }),
-        ...(await response(t)),
-      })
-      .catch((e) => {
-        if (e.message === "Unknown Message" || e.message === "Unknown Webhook") {
-          if (e.code === 10008) {
-            webhook.delete().catch(() => {});
-            logger.error(`Live ${type} disabled for ${guild.data.name}, message found deleted!`);
+  await processInBatch(data, async (guilds) => {
+    return Promise.all(
+      guilds.map(async (guild) => {
+        {
+          const event = guild[type];
+          if (!event.webhook.id) return;
+          const webhook = new Webhook({ token: event.webhook.token || undefined, id: event.webhook.id });
+          const t = getTranslator(guild.language?.value ?? "en-US");
+          const now = moment();
+          const res = await webhook
+            .editMessage(event.messageId, {
+              content: t("shards-embed.CONTENT", { TIME: `<t:${now.unix()}:R>` }),
+              ...(await response(t)),
+            })
+            .catch((e) => e);
+          if (res instanceof DiscordAPIError && (res.message === "Unknown Message" || res.message === "Unknown Webhook")) {
+            if (res.code === 10008) {
+              webhook.delete().catch(() => {});
+              logger.error(`Live ${type} disabled for ${guild.data.name}, message found deleted!`);
+            }
+            if (res.code === 10015) {
+              logger.error(`Live ${type} disabled for ${guild.data.name}, webhook not found!`);
+            }
+            guild[type].webhook.id = null;
+            guild[type].active = false;
+            guild[type].messageId = "";
+            guild[type].webhook.token = null;
+            await guild
+              .save()
+              .catch((er) => logger.error("Error Saving to Database" + ` ${type}[Guild: ${guild.data.name}]`, er));
           }
-          if (e.code === 10015) {
-            logger.error(`Live ${type} disabled for ${guild.data.name}, webhook not found!`);
-          }
-          guild[type].webhook.id = null;
-          guild[type].active = false;
-          guild[type].messageId = "";
-          guild[type].webhook.token = null;
-          guild.save().catch((er) => logger.error("Error Saving to Database" + ` ${type}[Guild: ${guild.data.name}]`, er));
         }
-      });
+      }),
+    );
   });
 };
