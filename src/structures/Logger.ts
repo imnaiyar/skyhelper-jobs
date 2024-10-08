@@ -6,5 +6,6 @@ const logger = new CustomLogger({
   timezone: "Asia/Kolkata",
   timestamp: true,
   env: process.env.NODE_ENV,
+  logToFile: true,
 });
 export { logger };
