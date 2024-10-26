@@ -11,8 +11,8 @@ const retraibleErrors = [
   "EAI_AGAIN", // DNS lookup timed out
   "ECONNABORTED", // Connection aborted
   "ESOCKETTIMEDOUT", // Socket timed out
-  "ConnectionRefused", // Connection refused
-  "ConnectTimeout", // Connection timed out
+  "ERR_CONNECTION_REFUSED", // Connection refused
+  "UND_ERR_CONNECT_TIMEOUT", // Connection timed out
   "ECONNREFUSED", // Connection refused
 ];
 class Webhook {
