@@ -14,6 +14,8 @@ const retraibleErrors = [
   "ERR_CONNECTION_REFUSED", // Connection refused
   "UND_ERR_CONNECT_TIMEOUT", // Connection timed out
   "ECONNREFUSED", // Connection refused
+  "ConnectionRefused",
+  "ConnectTimeout"
 ];
 class Webhook {
   private id: string;
