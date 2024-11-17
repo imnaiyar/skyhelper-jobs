@@ -28,7 +28,7 @@ export async function eventSchedules(type: "shard" | "times"): Promise<void> {
     }
     case "shard": {
       const response = async (t: ReturnType<typeof getTranslator>): Promise<WebhookMessageCreateOptions> =>
-        getShardsEmbed(currentDate, t, t("shards-embed.FOOTER"), true);
+        getShardsEmbed(currentDate, t, t("features:shards-embed.FOOTER"), true);
       const data = await getActiveUpdates("shard");
       await update(data, "autoShard", response);
     }
@@ -55,7 +55,7 @@ const update = async (
     const now = moment();
     const res = await webhook
       .editMessage(event.messageId, {
-        content: t("shards-embed.CONTENT", { TIME: `<t:${now.unix()}:R>` }),
+        content: t("features:shards-embed.CONTENT", { TIME: `<t:${now.unix()}:R>` }),
         ...(await response(t)),
       })
       .catch((e) => e);
