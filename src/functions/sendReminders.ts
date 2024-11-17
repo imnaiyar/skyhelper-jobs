@@ -52,7 +52,7 @@ async function sendGuildReminder(guild: GuildSchema, type: Events) {
             author: { name: "SkyHelper Reminders", icon_url: "https://skyhelper.xyz/assets/img/boticon.png" },
             title: t("features:reminders.TITLE", {
               // @ts-expect-error
-              TYPE: t("times-embed." + (type === "reset" ? "DAILY-RESET" : type.toUpperCase())),
+              TYPE: t("features:times-embed." + (type === "reset" ? "DAILY-RESET" : type.toUpperCase())),
             }),
             description: response,
             color: resolveColor("Random"),
