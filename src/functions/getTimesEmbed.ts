@@ -73,8 +73,9 @@ export const getTimesEmbed = async (t: ReturnType<typeof getTranslator>, text?: 
           });
         }
         return {
-          // @ts-ignore
-          name: t(`times-embed.${k.toString().toUpperCase()}`) + (status.active ? " <a:uptime:1228956558113771580>" : ""),
+          name:
+            // @ts-ignore
+            t(`features:times-embed.${k.toString().toUpperCase()}`) + (status.active ? " <a:uptime:1228956558113771580>" : ""),
           value: desc,
           inline: true,
         };
