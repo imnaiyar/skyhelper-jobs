@@ -20,11 +20,11 @@ export default (
   const { currentShard, currentRealm } = utils.shardsIndex(date);
   const info = shardsInfo[currentRealm][currentShard];
   const today = moment().tz("America/Los_Angeles").startOf("day");
-  const formatted = date.isSame(today, "day") ? t("shards-embed.TODAY") : date.format("Do MMMM YYYY");
+  const formatted = date.isSame(today, "day") ? t("features:shards-embed.TODAY") : date.format("Do MMMM YYYY");
   const status = utils.getStatus(date);
   let result: APIEmbed = {
     author: {
-      name: t("shards-embed.AUTHOR"),
+      name: t("features:shards-embed.AUTHOR"),
       icon_url:
         "https://media.discordapp.net/attachments/888067672028377108/1124426967438082058/SOShattering-radiant-shards.jpg?width=862&height=925",
     },
@@ -57,21 +57,21 @@ export default (
     components: [
       {
         type: ComponentType.Button,
-        label: t("shards-embed.BUTTON1"),
+        label: t("features:shards-embed.BUTTON1"),
         custom_id: `shards-timeline_${date.format("YYYY-MM-DD")}`,
         disabled: status === "No Shard",
         style: ButtonStyle.Success,
       },
       {
         type: ComponentType.Button,
-        label: t("shards-embed.BUTTON2"),
+        label: t("features:shards-embed.BUTTON2"),
         custom_id: `shards-location_${date.format("YYYY-MM-DD")}`,
         disabled: status === "No Shard",
         style: ButtonStyle.Success,
       },
       {
         type: ComponentType.Button,
-        label: t("shards-embed.BUTTON3"),
+        label: t("features:shards-embed.BUTTON3"),
         custom_id: "shards-about",
         style: ButtonStyle.Success,
       },
@@ -81,7 +81,7 @@ export default (
     result = {
       ...result,
       image: { url: "https://media.discordapp.net/attachments/867638574571323424/1193308709183553617/20240107_0342171.gif" },
-      description: `**${t("shards-embed.NO-SHARD")}**`,
+      description: `**${t("features:shards-embed.NO-SHARD")}**`,
       color: resolveColor("#9fb686"),
     };
   } else {
@@ -91,36 +91,39 @@ export default (
     result = {
       ...result,
       fields: [
-        { name: t("shards-embed.FIELDS.TYPE.LABEL"), value: `${info.type} (${info.rewards})`, inline: true },
-        { name: t("shards-embed.FIELDS.LOCATION.LABEL"), value: `${info.area}`, inline: true },
+        { name: t("features:shards-embed.FIELDS.TYPE.LABEL"), value: `${info.type} (${info.rewards})`, inline: true },
+        { name: t("features:shards-embed.FIELDS.LOCATION.LABEL"), value: `${info.area}`, inline: true },
         {
-          name: t("shards-embed.FIELDS.STATUS.LABEL"),
+          name: t("features:shards-embed.FIELDS.STATUS.LABEL"),
           value: allEnded
-            ? t("shards-embed.FIELDS.STATUS.VALUE.ENDED", {
+            ? t("features:shards-embed.FIELDS.STATUS.VALUE.ENDED", {
                 DURATION: status
                   .slice()
                   .reverse()
                   .find((s) => s.ended)?.duration,
               })
             : isActive
-              ? t("shards-embed.FIELDS.STATUS.VALUE.ACTIVE", { INDEX: getIndex(isActive.index), DURATION: isActive.duration })
-              : t("shards-embed.FIELDS.STATUS.VALUE.EXPECTED", {
+              ? t("features:shards-embed.FIELDS.STATUS.VALUE.ACTIVE", {
+                  INDEX: getIndex(isActive.index),
+                  DURATION: isActive.duration,
+                })
+              : t("features:shards-embed.FIELDS.STATUS.VALUE.EXPECTED", {
                   INDEX: getIndex(status.find((s) => !s.active && !s.ended)!.index),
                   DURATION: status.find((s) => !s.active && !s.ended)!.duration,
                 }),
         },
         {
-          name: t("shards-embed.BUTTON1"),
+          name: t("features:shards-embed.BUTTON1"),
           value: status
             .map((s, i) => {
               const prefix = "- **" + getIndex(i + 1) + " Shard:** ";
               // prettier-ignore
-              if (s.ended) return prefix + `~~<t:${s.start.unix()}:T> - <t:${s.end.unix()}:t> (${t("shards-embed.FIELDS.COUNTDOWN.VALUE.ENDED", { DURATION: s.duration })})~~`;
+              if (s.ended) return prefix + `~~<t:${s.start.unix()}:T> - <t:${s.end.unix()}:t> (${t("features:shards-embed.FIELDS.COUNTDOWN.VALUE.ENDED", { DURATION: s.duration })})~~`;
               // prettier-ignore
-              if (s.active) return prefix + `~~<t:${s.start.unix()}:T>~~ - <t:${s.end.unix()}:t> (${t("shards-embed.FIELDS.COUNTDOWN.VALUE.ACTIVE", { DURATION: s.duration })}) <a:uptime:1228956558113771580>`;
+              if (s.active) return prefix + `~~<t:${s.start.unix()}:T>~~ - <t:${s.end.unix()}:t> (${t("features:shards-embed.FIELDS.COUNTDOWN.VALUE.ACTIVE", { DURATION: s.duration })}) <a:uptime:1228956558113771580>`;
               return (
                 prefix +
-                `<t:${s.start.unix()}:T> - <t:${s.end.unix()}:t> (${t("shards-embed.FIELDS.COUNTDOWN.VALUE.EXPECTED", { DURATION: s.duration })})`
+                `<t:${s.start.unix()}:T> - <t:${s.end.unix()}:t> (${t("features:shards-embed.FIELDS.COUNTDOWN.VALUE.EXPECTED", { DURATION: s.duration })})`
               );
             })
             .join("\n"),

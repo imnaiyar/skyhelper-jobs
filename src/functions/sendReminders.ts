@@ -1,7 +1,7 @@
 import { getActiveReminders } from "#src/database/getGuildDBValues.js";
 import { Webhook } from "#src/structures/Webhook.js";
 import { roleMention } from "@discordjs/builders";
-import { getTranslator, langKeys } from "./getTranslator.js";
+import { getTranslator, LangKeys } from "./getTranslator.js";
 import { logger } from "#src/structures/Logger.js";
 import { SkytimesUtils as skyutils } from "skyhelper-utils";
 import { resolveColor } from "../utils/resolveColor.js";
@@ -31,13 +31,13 @@ async function sendGuildReminder(guild: GuildSchema, type: Events) {
     const wb = new Webhook({ token: webhook.token, id: webhook.id });
 
     const roleid = event?.role ?? default_role ?? undefined;
-    const role = roleid && t("reminders.ROLE_MENTION", { ROLE: roleMention(roleid) });
+    const role = roleid && t("features:reminders.ROLE_MENTION", { ROLE: roleMention(roleid) });
 
     let response = null;
     if (type === "eden") {
-      response = t("reminders.EDEN_RESET");
+      response = t("features:reminders.EDEN_RESET");
     } else if (type === "reset") {
-      response = t("reminders.DAILY_RESET");
+      response = t("features:reminders.DAILY_RESET");
     } else {
       response = getResponse(type, t);
     }
@@ -50,7 +50,7 @@ async function sendGuildReminder(guild: GuildSchema, type: Events) {
         embeds: [
           {
             author: { name: "SkyHelper Reminders", icon_url: "https://skyhelper.xyz/assets/img/boticon.png" },
-            title: t("reminders.TITLE", {
+            title: t("features:reminders.TITLE", {
               // @ts-expect-error
               TYPE: t("times-embed." + (type === "reset" ? "DAILY-RESET" : type.toUpperCase())),
             }),
@@ -88,7 +88,7 @@ async function sendGuildReminder(guild: GuildSchema, type: Events) {
  * @param role Role mention, if any
  * @returns The response to send
  */
-function getResponse(type: Events, t: (key: langKeys, options?: {}) => string) {
+function getResponse(type: Events, t: (key: LangKeys, options?: {}) => string) {
   let skytime;
   let key = "";
   switch (type) {
@@ -106,10 +106,10 @@ function getResponse(type: Events, t: (key: langKeys, options?: {}) => string) {
       break;
   }
   const { startTime, endTime, active } = skyutils.getEventDetails(key).status;
-  if (!active) return t("reminders.ERROR");
-  return `${t("reminders.COMMON", {
+  if (!active) return t("features:reminders.ERROR");
+  return `${t("features:reminders.COMMON", {
     // @ts-expect-error
-    TYPE: t("times-embed." + skytime?.toUpperCase()),
+    TYPE: t("features:times-embed." + skytime?.toUpperCase()),
     TIME: `<t:${startTime.unix()}:t>`,
     "TIME-END": `<t:${endTime.unix()}:t>`,
     "TIME-END-R": `<t:${endTime.unix()}:R>`,
