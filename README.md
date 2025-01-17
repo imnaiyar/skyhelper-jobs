@@ -1,3 +1,6 @@
+> [!NOTE]  
+> This is moved to [SkyHelper](https://github.com/imnaiyar/skyhelper) monorepo
+
 # SkyHelper Jobs
 
 This is an add-on plugin that goes along with [SkyHelper](https://github.com/imnaiyar/SkyHelper) bot, that schedules and executes cron jobs related to the bot's functionalities, such as reminders and live updates. This plugin ensures the bot can handle scheduled tasks seamlessly and on different process than bot's so it doesn't interfere with it's performance.
